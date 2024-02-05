@@ -1,118 +1,211 @@
-import Image from "next/image";
-import { Inter } from "next/font/google";
+import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import { useMutation } from "@/hooks/useMutation";
+import useSWR from "swr";
+import fetcher from "@/utils/fetcher";
+import Swal from "sweetalert2";
+const LayoutComponent = dynamic(() => import("@/layouts"));
 
-const inter = Inter({ subsets: ["latin"] });
+export default function Home({ notes }) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [edited, setEdited] = useState(false);
+  const [idEdit, setIdEdit] = useState(null);
+  const { mutate } = useMutation();
 
-export default function Home() {
-  return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">pages/index.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+  const { data, error, isLoading } = useSWR(
+    "https://paace-f178cafcae7b.nevacloud.io/api/notes",
+    fetcher,
+    { refreshInterval: 1000 }
   );
+
+  const handleSubmit = async () => {
+    const formNotes = { title, description };
+    try {
+      const response = await fetch("/api/notes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formNotes),
+      });
+
+      if (response?.ok) {
+        setTitle("");
+        setDescription("");
+      } else {
+        console.error("Failed to add note");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  const handleEditNote = async (id) => {
+    const res = await fetch(
+      `https://paace-f178cafcae7b.nevacloud.io/api/notes/${id}`
+    );
+    const listNotes = await res.json();
+    setEdited(true);
+    setIdEdit(id);
+    setTitle(listNotes.data.title);
+    setDescription(listNotes.data.description);
+  };
+  const handeEditSubmit = async (id) => {
+    const formNotes = { title, description };
+    const res = await mutate({
+      url: `https://paace-f178cafcae7b.nevacloud.io/api/notes/update/${id}`,
+      method: "PATCH",
+      payload: formNotes,
+    });
+    if (res?.success) {
+      setTitle("");
+      setDescription("");
+    }
+  };
+  const HandleDelete = async (id, title) => {
+    Swal.fire({
+      title: `Anda akan menghapus note ${title} ?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ya",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const res = await mutate({
+          url: `https://paace-f178cafcae7b.nevacloud.io/api/notes/delete/${id}`,
+          method: "DELETE",
+        });
+        if (res?.success) {
+          Swal.fire({
+            title: "Terhapus!",
+            text: "Note Berhasil dihapus!",
+            icon: "success",
+          });
+        }
+      }
+    });
+  };
+
+  return (
+    <LayoutComponent
+      metaTitle="Home"
+      metaDescription="ini adalah halaman Home Page"
+      metaKeyword="Home, Notes"
+    >
+      {/* Loading */}
+      {isLoading && (
+        <center>
+          <span className="loading loading-bars loading-lg mt-20"></span>
+        </center>
+      )}
+      {/* List Notes */}
+      <div className=" mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 my-6 mx-4">
+        {data?.data?.map((note) => (
+          <div className="card bg-base-100 shadow-xl" key={note.id}>
+            <div className="card-body">
+              <h2 className="card-title">{note.title}</h2>
+              <p>{note.description} </p>
+              <div className="card-actions justify-end">
+                <button
+                  className="btn btn-accent"
+                  onClick={() => {
+                    document.getElementById("my_modal_2").showModal();
+                    handleEditNote(note.id);
+                  }}
+                >
+                  Edit
+                </button>
+                <button
+                  className="btn  btn-secondary"
+                  onClick={() => HandleDelete(note.id, note.title)}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* Button Add Notes */}
+      <button
+        className="btn btn-circle btn-primary fixed shadow-xl right-5 bottom-20"
+        onClick={() => {
+          document.getElementById("my_modal_2").showModal();
+          setTitle("");
+          setDescription("");
+          setEdited(false);
+        }}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="25"
+          height="25"
+          fill="currentColor"
+          className="bi bi-plus-lg"
+          viewBox="0 0 16 16"
+        >
+          <path
+            fillRule="evenodd"
+            d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"
+          />
+        </svg>
+      </button>
+      {/* Modal Add Notes */}
+      <dialog id="my_modal_2" className="modal">
+        <div className="modal-box px-4">
+          <h3 className="font-bold text-xl">Form Notes</h3>
+          <label className="form-control w-full  my-2">
+            <div className="label">
+              <span className="label-text">Title :</span>
+            </div>
+            <input
+              type="text"
+              placeholder="Type here"
+              className="input input-bordered w-full "
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </label>
+          <label className="form-control w-full  my-2">
+            <div className="label">
+              <span className="label-text">Title :</span>
+            </div>
+            <textarea
+              className="textarea textarea-bordered"
+              placeholder="Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            ></textarea>
+          </label>
+          {/* Button Modal */}
+          {edited ? (
+            <button
+              className=" btn btn-accent w-full my-2"
+              onClick={() => handeEditSubmit(idEdit)}
+            >
+              Edit
+            </button>
+          ) : (
+            <button
+              className=" btn btn-primary w-full my-2"
+              onClick={handleSubmit}
+            >
+              Save
+            </button>
+          )}
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
+    </LayoutComponent>
+  );
+}
+export async function getServerSideProps() {
+  // Fetch data from external API
+  const res = await fetch("https://paace-f178cafcae7b.nevacloud.io/api/notes");
+  const notes = await res.json();
+  // Pass data to the page via props
+  return { props: { notes } };
 }
